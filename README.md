@@ -32,9 +32,9 @@ mubu-/
 ├── prototypes/                         # 交互原型
 │   ├── prototype_v1.0.html             # v1.0 可交互 HTML 原型
 │   └── prototype_v1.1.html             # v1.1 可交互 HTML 原型（9 种状态 + Focus Mode）
-├── flows/                              # 业务流程图
-│   ├── flowchart_v1.0.md               # v1.0 版 7 张 Mermaid 流程图
-│   └── flowchart_v1.1.md               # v1.1 版流程图（主线 + 异常 + 状态映射）
+ ── flows/                              # 业务流程图
+    ├── flowchart_v1.0.md               # v1.0 版 7 张 Mermaid 流程图
+    └── flowchart_v1.1.md               # v1.1 版流程图（主线 + 异常 + 状态映射）
 
 ```
 
