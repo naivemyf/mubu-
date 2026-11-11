@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幕布 AI 智能总结 — 最终版 PRD v1.0</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:'neutral', securityLevel:'loose'});</script>
+<style>
+  :root {
+    --bg: #fafbfc; --card-bg: #ffffff; --text: #1a1a2e; --text-secondary: #545d7a;
+    --accent: #1a1a2e; --accent-light: #f0f0f2; --border: #e5e7eb;
+    --green: #10b981; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6;
+    --radius: 8px; --shadow: 0 1px 3px rgba(0,0,0,.04);
+    --nav-width: 240px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px;
+    display: flex;
+  }
+
+  /* Side Navigation */
+  .side-nav {
+    position: fixed; top: 0; left: 0; width: var(--nav-width); height: 100vh;
+    background: var(--text); color: #fff; overflow-y: auto; z-index: 100;
+    padding: 28px 0 40px; font-size: 13px;
+  }
+  .side-nav .nav-header {
+    padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 16px;
+  }
+  .side-nav .nav-header h2 { font-size: 16px; font-weight: 700; }
+  .side-nav .nav-header .ver { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+  .side-nav a { display: block; padding: 5px 20px; color: rgba(255,255,255,.55); text-decoration: none; transition: all .15s; font-size: 12.5px; }
+  .side-nav a:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .side-nav a.active { color: #fff; font-weight: 600; background: rgba(255,255,255,.1); border-left: 3px solid #fff; padding-left: 17px; }
+  .side-nav .nav-section { margin: 12px 0 4px; padding: 0 20px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.3); font-weight: 700; }
+
+  /* Version Switcher */
+  .version-switcher {
+    padding: 0 20px; margin-bottom: 20px;
+  }
+  .version-switcher select {
+    width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.08); color: #fff; font-size: 12px; cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+
+  /* Main Content */
+  .main-content { margin-left: var(--nav-width); flex: 1; padding: 40px 48px 80px; max-width: 1050px; }
+
+  /* Header */
+  .prd-header { margin-bottom: 40px; }
+  .prd-header .badge { display: inline-block; background: var(--text); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: .5px; margin-bottom: 16px; }
+  .prd-header h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; letter-spacing: -.5px; }
+  .prd-header .subtitle { color: var(--text-secondary); font-size: 15px; line-height: 1.6; max-width: 640px; }
+  .prd-header .meta-row { display: flex; gap: 36px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); }
+  .prd-header .meta-row strong { color: var(--text); display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 2px; }
+
+  /* Sections */
+  section { margin-bottom: 48px; }
+  section h2 { font-size: 22px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); letter-spacing: -.3px; }
+  section h3 { font-size: 17px; font-weight: 600; margin: 28px 0 12px; }
+  section h4 { font-size: 14px; font-weight: 600; margin: 18px 0 8px; color: var(--text-secondary); }
+  section p { margin-bottom: 12px; }
+
+  /* Cards */
+  .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px 28px; margin-bottom: 16px; border: 1px solid var(--border); }
+  .card.info { border-left: 3px solid var(--text); }
+  .card.warn { border-left: 3px solid var(--amber); }
+  .card.good { border-left: 3px solid var(--green); }
+  .card.bad  { border-left: 3px solid var(--red); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+  th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #f8fafc; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); }
+  td { vertical-align: top; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .tag.green { background: #d1fae5; color: #065f46; }
+  .tag.red   { background: #fee2e2; color: #991b1b; }
+  .tag.amber { background: #fef3c7; color: #92400e; }
+  .tag.blue  { background: #dbeafe; color: #1e40af; }
+  .tag.purple { background: #ede9fe; color: #5b21b6; }
+  .tag.gray  { background: #f3f4f6; color: #6b7280; }
+
+  /* Key insight */
+  .key-insight { background: var(--accent-light); border-radius: var(--radius); padding: 16px 20px; margin: 20px 0; font-size: 14px; }
+  .key-insight strong { color: var(--accent); }
+
+  /* Feature module (prototype slice) */
+  .feature-module {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius);
+    margin: 24px 0; overflow: hidden;
+  }
+  .feature-header { padding: 18px 24px; background: #fafbfc; border-bottom: 1px solid var(--border); }
+  .feature-header h3 { font-size: 16px; margin: 0 0 4px; font-weight: 700; }
+  .feature-header p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .feature-content { display: flex; gap: 0; }
+  .logic-rules { flex: 1; padding: 24px; min-width: 0; }
+  .logic-rules h4 { font-size: 13px; font-weight: 700; margin: 0 0 12px; color: var(--text); text-transform: uppercase; letter-spacing: .5px; }
+  .logic-rules dl { margin: 0; }
+  .logic-rules dt { font-weight: 600; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+  .logic-rules dd { margin-left: 0; font-size: 13px; margin-bottom: 6px; }
+  .sandbox-preview { width: 420px; flex-shrink: 0; border-left: 1px solid var(--border); padding: 24px; background: #fafbfc; }
+  .sandbox-preview h4 { font-size: 13px; font-weight: 700; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .sandbox-preview figure { margin: 0; }
+  .sandbox-preview iframe { width: 100%; height: 500px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+  .sandbox-preview figcaption { font-size: 11px; color: var(--text-secondary); margin-top: 8px; text-align: center; }
+  @media (max-width: 900px) {
+    .feature-content { flex-direction: column; }
+    .sandbox-preview { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+  }
+
+  /* Flowchart embed */
+  .flowchart-embed { margin: 20px 0; padding: 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); }
+  .flowchart-embed h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .mermaid { display: flex; justify-content: center; }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 6px 0; font-size: 14px; }
+  .checklist li::before { content: '☐ '; color: var(--text-secondary); margin-right: 6px; }
+
+  /* Footer */
+  .prd-footer { text-align: center; padding: 32px; color: var(--text-secondary); font-size: 12px; border-top: 1px solid var(--border); margin-top: 48px; }
+
+  @media (max-width: 768px) {
+    .side-nav { display: none; }
+    .main-content { margin-left: 0; padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== SIDE NAVIGATION ====== -->
+<nav class="side-nav">
+  <div class="nav-header">
+    <h2>幕布 AI 智能总结</h2>
+    <div class="ver">PRD v1.0 · 历史版本</div>
+  </div>
+  <div class="version-switcher">
+    <select onchange="if(this.value) location.href=this.value">
+      <option value="">v1.0（历史）</option>
+      <option value="../requirements/prd_v1.0.html">v1.0 初版（历史）</option>
+      <option value="../requirements/prd_v1.1_final.html">v1.1 最新 →</option>
+    </select>
+  </div>
+  <div class="nav-section">核心章节</div>
+  <a href="#s1">一、需求背景</a>
+  <a href="#s2">二、需求目标</a>
+  <a href="#s3">三、用户与使用场景</a>
+  <a href="#s4">四、需求功能清单</a>
+  <div class="nav-section">详细方案</div>
+  <a href="#s5-1">五.1 文件列表 AI 总结展示</a>
+  <a href="#s5-2">五.2 AI 总结生成与更新</a>
+  <a href="#s5-3">五.3 完成度判断逻辑</a>
+  <a href="#s5-4">五.4 隐私处理模式</a>
+  <a href="#s5-5">五.5 大文件聚焦总结</a>
+  <div class="nav-section">支撑章节</div>
+  <a href="#s6">六、业务流程图</a>
+  <a href="#s7">七、异常与边界处理</a>
+  <a href="#s8">八、数据追踪与埋点</a>
+  <a href="#s9">九、未来演进规划</a>
+  <a href="#s10">十、附件</a>
+  <a href="#s11">附录：市场分析与竞品</a>
+</nav>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="main-content">
+
+<!-- Historical Version Banner -->
+<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 10px 16px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+  <span style="font-size: 16px;">⚠️</span>
+  <span><strong>这是历史版本</strong> — PRD v1.0 最终版（2026-05-31）。<a href="../requirements/prd_v1.1_final.html" style="color: #1a1a2e; font-weight: 600; text-decoration: underline;">查看最新版本 v1.1 →</a></span>
+</div>
+
+<!-- Header -->
+<header class="prd-header">
+  <div class="badge">PRD v1.0 · 最终版 · 2026-05-31</div>
+  <h1>幕布 AI 智能总结</h1>
+  <p class="subtitle">为幕布（大纲笔记 + 思维导图工具）规划 AI 智能总结功能——用户在文件列表页即可看到每个大纲文件的 AI 自动摘要，降低信息筛选成本，建立 AI 产品心智。</p>
+  <div class="meta-row">
+    <div><strong>版本</strong>v1.0</div>
+    <div><strong>日期</strong>2026-05-31</div>
+    <div><strong>状态</strong>最终版</div>
+    <div><strong>用途</strong>个人产品学习研究</div>
+    <div><strong>原型</strong>prototype_v1.0.html</div>
+    <div><strong>流程</strong>flowchart_v1.0.md</div>
+  </div>
+</header>
+
+<!-- ====== 一、需求背景 ====== -->
+<section id="s1">
+<h2>一、需求背景</h2>
+
+<div class="card info">
+  <h3>产品现状</h3>
+  <p>幕布是一款大纲式笔记 + 思维导图工具，核心体验为"极简大纲 ↔ 一键转思维导图"。产品拥有完整的 Freemium 订阅定价体系（定价低于 Xmind），包含教育优惠买一送一、限时免费领会员、邀请好友领会员等拉新机制。</p>
+  <p>当前幕布面临三大挑战：</p>
+  <ul style="padding-left:20px; line-height:2;">
+    <li><strong>AI 化进度为零：</strong>Xmind 2023 年已启动 AI 化，2025 年全面发布 Copilot（四大 AI 功能 + DeepSeek-R1），幕布尚无任何 AI 功能</li>
+    <li><strong>市场声量被挤压：</strong>搜索"思维导图"优先出 Xmind，小红书/B站上 Xmind 的 AI 种草内容铺天盖地，幕布几乎无声量</li>
+    <li><strong>用户留存压力：</strong>产品更新停滞感强，用户可能流向 Xmind 或飞书文档等替代品</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>市场窗口</h3>
+  <p>AI 思维导图工具市场 2025 年规模约 <strong>9-21 亿美元</strong>，CAGR <strong>~21%</strong>，远超传统思维导图市场（~15%）。"AI 化"不是锦上添花，而是生存必需。没有 AI 功能的思维导图工具将在未来 2-3 年内被边缘化。</p>
+  <p>竞品方面，Xmind 的 AI 聚焦于"生成新导图"，尚无"对已有导图做智能总结"的能力。豆包的 AI 总结是"扁平化"的，无法感知大纲层级。幕布有独特的差异化窗口——<strong>结构感知型 AI 总结</strong>。</p>
+</div>
+</section>
+
+<!-- ====== 二、需求目标 ====== -->
+<section id="s2">
+<h2>二、需求目标</h2>
+
+<div class="table-wrap">
+<table>
+  <tr><th>目标类型</th><th>描述</th><th>衡量指标</th><th>目标值</th></tr>
+  <tr>
+    <td><strong>用户留存</strong></td>
+    <td>通过 AI 总结降低用户"遗忘内容、重复浏览"的摩擦，提升回访率</td>
+    <td>7 日留存率提升</td>
+    <td>+10%</td>
+  </tr>
+  <tr>
+    <td><strong>AI 心智建立</strong></td>
+    <td>让用户感知"幕布有 AI 了"，为后续 AI 付费功能铺路</td>
+    <td>AI 总结功能触达率</td>
+    <td>> 60% 活跃用户</td>
+  </tr>
+  <tr>
+    <td><strong>品牌重新激活</strong></td>
+    <td>以 AI 总结作为产品更新的标志性事件，重新获得用户关注</td>
+    <td>应用商店评分 / 社交媒体讨论量</td>
+    <td>正向增长</td>
+  </tr>
+  <tr>
+    <td><strong>数据飞轮启动</strong></td>
+    <td>积累用户对 AI 总结的满意度数据，迭代模型质量</td>
+    <td>总结满意度（👍/👎）</td>
+    <td>> 70% 正向</td>
+  </tr>
+</table>
+</div>
+
+<div class="key-insight">
+  <strong>💡 战略定位：</strong>AI 总结 = <strong>免费基础功能</strong>（留存拉新，建立 AI 心智）；AI 一键生成思维导图 / AI 优化大纲结构 = <strong>付费增值功能</strong>（后续变现）。这与幕布现有的"低价+促销"定价优势完全吻合。
+</div>
+</section>
+
+<!-- ====== 三、用户与使用场景 ====== -->
+<section id="s3">
+<h2>三、用户与使用场景</h2>
+
+<h3>3.1 核心用户画像</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>用户类型</th><th>典型场景</th><th>痛点</th><th>AI 总结的价值</th></tr>
+  <tr>
+    <td><strong>学生/考研党</strong></td>
+    <td>用幕布整理课堂笔记、复习大纲</td>
+    <td>笔记太多，复习时不知道从哪看起；隔一段时间打开忘了内容</td>
+    <td>打开文件列表即看到每篇笔记主旨，快速定位</td>
+  </tr>
+  <tr>
+    <td><strong>知识工作者</strong></td>
+    <td>用幕布做读书笔记、会议纪要、项目规划</td>
+    <td>大纲越积越多，管理成本上升，忘了每个文件的内容</td>
+    <td>摘要快速回忆，不用每个文件点进去看</td>
+  </tr>
+  <tr>
+    <td><strong>创作者/博主</strong></td>
+    <td>用幕布搭建内容框架、选题脑暴</td>
+    <td>大纲结构改了多次后想快速回顾"现在这版主要讲的什么"</td>
+    <td>总结随大纲更新自动刷新，始终反映最新内容</td>
+  </tr>
+</table>
+</div>
+
+<h3>3.2 核心用户旅程</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>阶段</th><th>用户触点</th><th>用户行为</th><th>痛点/情绪</th><th>产品机会点</th></tr>
+  <tr>
+    <td>1. 打开幕布</td><td>文件列表页</td><td>看到自己创建的多个大纲文件</td><td>"上周写的笔记主要讲了什么？"</td><td>文件名旁展示 AI 摘要，一眼明了</td>
+  </tr>
+  <tr>
+    <td>2. 浏览文件</td><td>文件列表页</td><td>上下滑动浏览文件</td><td>文件多了记不清，需要一个一个打开看</td><td>摘要作为"内容预览"降低浏览成本</td>
+  </tr>
+  <tr>
+    <td>3. 编辑大纲</td><td>编辑页</td><td>修改大纲内容</td><td>写的时候不确定方向对不对</td><td>（远期：编辑页内嵌实时总结建议）</td>
+  </tr>
+  <tr>
+    <td>4. 保存返回</td><td>文件列表页</td><td>看到摘要状态变为"已更新"</td><td>"我改完的内容，总结也跟上了吗？"</td><td>自动刷新 + 标记"已更新"，给予确认感</td>
+  </tr>
+  <tr>
+    <td>5. 再次打开</td><td>文件列表页</td><td>看到最新的静态摘要</td><td>安心：一眼就能回忆起文件核心内容</td><td>摘要始终准确、不矛盾、有结构感</td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 四、功能清单 ====== -->
+<section id="s4">
+<h2>四、需求功能清单</h2>
+
+<div class="table-wrap">
+<table>
+  <tr><th>模块</th><th>功能点</th><th>优先级</th><th>依赖</th><th>说明</th></tr>
+  <tr>
+    <td rowspan="4"><strong>AI 智能总结</strong></td>
+    <td>自动判断大纲是否完成</td>
+    <td><span class="tag red">P0</span></td>
+    <td>AI 模型</td>
+    <td>判断标准：距上次编辑时间、内容闭合度、节点数</td>
+  </tr>
+  <tr>
+    <td>自动生成 2-3 句自然语言摘要</td>
+    <td><span class="tag red">P0</span></td>
+    <td>AI 模型</td>
+    <td>基于大纲层级，逐层提炼主旨（不含标题本身）</td>
+  </tr>
+  <tr>
+    <td>文件列表页摘要展示</td>
+    <td><span class="tag red">P0</span></td>
+    <td>前端 UI</td>
+    <td>文件名下方，AI 标签 + 单行摘要 + 状态标签</td>
+  </tr>
+  <tr>
+    <td>编辑后自动刷新 + "已更新"标记</td>
+    <td><span class="tag red">P0</span></td>
+    <td>前后端联动</td>
+    <td>覆盖旧摘要，脉冲动画提示</td>
+  </tr>
+  <tr>
+    <td rowspan="2"><strong>边界处理</strong></td>
+    <td>节点 &lt;5 时提示"无法总结"</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>前端逻辑</td>
+    <td>避免产出低质量总结，引导用户补充内容</td>
+  </tr>
+  <tr>
+    <td>大文件（>50 节点）聚焦总结</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>AI + 标注系统</td>
+    <td>提取主标题 + 一级节点 + 重点标注内容</td>
+  </tr>
+  <tr>
+    <td rowspan="2"><strong>隐私与性能</strong></td>
+    <td>本地处理模式</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>端侧 AI</td>
+    <td>数据不离开设备，速度较慢，完全隐私</td>
+  </tr>
+  <tr>
+    <td>云端处理模式</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>云端 API</td>
+    <td>加密传输，速度快，存在传输风险</td>
+  </tr>
+  <tr>
+    <td rowspan="3"><strong>筛选与管理</strong></td>
+    <td>状态标签展示（7 种）</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>前端 UI</td>
+    <td>已总结/已更新/生成中/无法总结/失败/大文件摘要/编辑中</td>
+  </tr>
+  <tr>
+    <td>状态筛选下拉菜单</td>
+    <td><span class="tag blue">P2</span></td>
+    <td>前端 UI</td>
+    <td>按 AI 总结状态过滤文件列表</td>
+  </tr>
+  <tr>
+    <td>失败状态重试入口</td>
+    <td><span class="tag amber">P1</span></td>
+    <td>前后端联动</td>
+    <td>点击"重新生成"按钮触发</td>
+  </tr>
+  <tr>
+    <td rowspan="2"><strong>付费增值（远期）</strong></td>
+    <td>AI 一键生成思维导图</td>
+    <td><span class="tag blue">P2</span></td>
+    <td>AI 模型</td>
+    <td>付费功能，输入主题/导入文档 → 自动生成完整导图</td>
+  </tr>
+  <tr>
+    <td>AI 优化大纲结构</td>
+    <td><span class="tag blue">P2</span></td>
+    <td>AI 模型</td>
+    <td>付费功能，自动调整层级/合并冗余/补充缺失</td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 五、详细方案 ====== -->
+<h2 style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 28px;">五、详细方案</h2>
+
+<!-- 5.1 文件列表 AI 总结展示 -->
+<article class="feature-module" id="s5-1">
+  <header class="feature-header">
+    <h3>功能一：文件列表 AI 总结展示</h3>
+    <p>用户打开幕布，在文件列表页每个文件名下方即可看到 AI 自动生成的内容摘要，支持 7 种状态标签。</p>
+  </header>
+  <section class="feature-content">
+    <section class="logic-rules">
+      <h4>交互流程图</h4>
+      <div class="mermaid">
+      flowchart TD
+        A[用户打开幕布] --> B[加载文件列表]
+        B --> C{每个文件的状态}
+        C -->|已完成+已总结| D[展示摘要+已总结标签]
+        C -->|已完成+有更新| E[展示新摘要+已更新标签🟠]
+        C -->|判断中| F[骨架屏+生成中标签🔵]
+        C -->|节点不足| G[提示节点过少+无法总结标签]
+        C -->|总结失败| H[错误提示+失败标签🔴]
+        C -->|编辑中| I[提示编辑中+编辑中标签]
+        C -->|大文件| J[聚焦摘要+大文件摘要标签📌]
+        D --> K[用户浏览文件列表]
+        E --> K
+        F --> K
+        G --> K
+        H --> K
+        I --> K
+        J --> K
+      </div>
+
+      <h4>规则描述</h4>
+      <dl>
+        <dt>展示位置</dt>
+        <dd>文件名下方第二行，AI 标签（灰色小字）+ 摘要文字（单行截断）</dd>
+        <dt>摘要内容</dt>
+        <dd>2-3 句自然语言，仅总结标题下一级节点和重点标注内容，不重复文件标题</dd>
+        <dt>状态标签</dt>
+        <dd>文件行右侧固定宽度（72px），7 种状态各有独立配色：已总结（绿）、已更新（橙+脉冲）、生成中（蓝+动画点）、无法总结（灰）、失败（红）、大文件摘要（紫）、编辑中（灰）</dd>
+        <dt>筛选功能</dt>
+        <dd>顶部"全部状态"下拉菜单，可筛选特定状态的文件</dd>
+        <dt>状态流转</dt>
+        <dd>生成中 → 已总结 / 失败；已总结 →（编辑保存后）→ 编辑中 → 生成中 → 已更新；失败 →（重试）→ 生成中 → 已总结</dd>
+      </dl>
+    </section>
+    <aside class="sandbox-preview">
+      <h4>原型预览</h4>
+      <figure>
+        <iframe title="AI总结文件列表原型" src="../prototypes/prototype_v1.0.html?sandbox=true&focus=summary-card" sandbox="allow-scripts allow-same-origin"></iframe>
+        <figcaption>聚焦展示 AI 总结卡片在文件列表中的交互效果（专注模式）。完整原型请打开 prototype_v1.0.html。</figcaption>
+      </figure>
+    </aside>
+  </section>
+</article>
+
+<!-- 5.2 AI 总结生成与更新 -->
+<article class="feature-module" id="s5-2">
+  <header class="feature-header">
+    <h3>功能二：AI 总结生成与更新</h3>
+    <p>AI 自动判断大纲完成度，完成后自动生成摘要；用户编辑保存后自动刷新覆盖。</p>
+  </header>
+  <section class="feature-content">
+    <section class="logic-rules">
+      <h4>交互流程图</h4>
+      <div class="mermaid">
+      flowchart TD
+        A[用户编辑大纲并保存] --> B{节点数 ≥ 5?}
+        B -->|否| C[清除旧总结，标记: 无法总结]
+        B -->|是| D{AI 判断是否已完成?}
+        D -->|编辑中| E[保留旧总结，标记: 编辑中]
+        D -->|已完成| F[触发 AI 重新总结]
+        F --> G[生成新摘要]
+        G --> H[覆盖旧摘要]
+        H --> I[标记: 已更新，脉冲提示]
+        I --> J{处理模式?}
+        J -->|本地| K[端侧模型运行，不传数据]
+        J -->|云端| L[加密传输至云端API]
+        K --> M[更新文件列表页]
+        L --> M
+        C --> M
+        E --> M
+      </div>
+
+      <h4>规则描述</h4>
+      <dl>
+        <dt>触发时机</dt>
+        <dd>用户保存大纲后，AI 自动判断完成度。判定为"已完成"时触发总结生成</dd>
+        <dt>更新策略</dt>
+        <dd>新摘要覆盖旧摘要，标签切换为"已更新"，带脉冲动画提示</dd>
+        <dt>打开行为</dt>
+        <dd>打开幕布时展示静态快照（上次生成的摘要），不主动触发重新生成</dd>
+        <dt>无变更</dt>
+        <dd>用户未修改大纲，摘要保持不变，标签保持"已总结"</dd>
+      </dl>
+    </section>
+    <aside class="sandbox-preview">
+      <h4>原型预览</h4>
+      <figure>
+        <iframe title="AI总结更新流程" src="../prototypes/prototype_v1.0.html?sandbox=true&focus=summary-card" sandbox="allow-scripts allow-same-origin"></iframe>
+        <figcaption>原型中包含"已更新"状态（橙色脉冲标签），以及重试后状态自动迁移的完整流程。</figcaption>
+      </figure>
+    </aside>
+  </section>
+</article>
+
+<!-- 5.3 完成度判断 -->
+<article class="feature-module" id="s5-3">
+  <header class="feature-header">
+    <h3>功能三：完成度判断逻辑</h3>
+    <p>AI 通过时间窗口、内容闭合度、节点总数三个维度判断大纲是否"已完成"，避免在用户编辑过程中生成不准确的总结。</p>
+  </header>
+  <section class="feature-content">
+    <section class="logic-rules">
+      <h4>判断流程图</h4>
+      <div class="mermaid">
+      flowchart TD
+        A[AI 接收大纲内容] --> B{距上次编辑 ≥ 10分钟?}
+        B -->|否| C[判定: 编辑中]
+        B -->|是| D{内容闭合度检查}
+        D -->|存在未填充节点/问号/占位符| C
+        D -->|结构完整无断点| E{节点总数}
+        E -->|< 5| F[判定: 节点过少]
+        E -->|≥ 5| G[判定: 已完成 ✅]
+        C --> H[等待下次保存时重新判断]
+        F --> I[提示用户补充内容]
+        G --> J[进入总结生成流程]
+      </div>
+
+      <h4>规则描述</h4>
+      <dl>
+        <dt>时间窗口</dt>
+        <dd>距上次编辑 < 10 分钟 → 判定为编辑中，避免频繁触发（10 分钟为建议值，可配置）</dd>
+        <dt>内容闭合度</dt>
+        <dd>检测大纲中是否存在无文本节点、仅含"?""TODO""待补充"等占位符的节点</dd>
+        <dt>节点门槛</dt>
+        <dd>节点 < 5 → 无法总结，给予明确引导文案</dd>
+        <dt>兜底策略</dt>
+        <dd>如果 AI 无法判断（如边界情况），默认保守处理 → 标记为编辑中，等待更多信号</dd>
+      </dl>
+    </section>
+    <aside class="sandbox-preview">
+      <h4>原型预览</h4>
+      <figure>
+        <iframe title="完成度判断状态" src="../prototypes/prototype_v1.0.html?sandbox=true&focus=summary-card" sandbox="allow-scripts allow-same-origin"></iframe>
+        <figcaption>原型中展示了"编辑中"（草稿）和"无法总结"（节点不足）两种边界状态。</figcaption>
+      </figure>
+    </aside>
+  </section>
+</article>
+
+<!-- 5.4 隐私处理模式 -->
+<article class="feature-module" id="s5-4">
+  <header class="feature-header">
+    <h3>功能四：隐私处理模式</h3>
+    <p>用户首次使用 AI 总结时，弹出隐私选择面板。可在本地处理（端侧 AI）和云端处理（加密 API）之间选择，随时可在设置中切换。</p>
+  </header>
+  <section class="feature-content">
+    <section class="logic-rules">
+      <h4>选择流程图</h4>
+      <div class="mermaid">
+      flowchart TD
+        A[首次使用AI总结] --> B[弹出隐私选择面板]
+        B --> C{用户选择}
+        C -->|🔒 本地| D[端侧AI模型]
+        D --> E[优点: 数据不离开设备]
+        D --> F[缺点: 速度较慢]
+        C -->|☁️ 云端| G[云端API]
+        G --> H[优点: 速度快]
+        G --> I[缺点: 加密传输，存在风险]
+        E --> J[保存偏好]
+        F --> J
+        H --> K[保存偏好]
+        I --> K
+        J --> L[后续按偏好执行]
+        K --> L
+      </div>
+
+      <h4>规则描述</h4>
+      <dl>
+        <dt>首次触发</dt>
+        <dd>用户首次进入文件列表页时弹出选择面板，不可跳过，必须选择</dd>
+        <dt>随时切换</dt>
+        <dd>左侧栏"隐私设置"入口 + 顶部下拉菜单均可随时切换</dd>
+        <dt>切换即时生效</dt>
+        <dd>切换后，后续所有总结请求按新模式执行；不影响已生成的旧总结</dd>
+        <dt>隐私说明</dt>
+        <dd>面板内明确告知两种模式的优缺点，帮助用户做知情选择</dd>
+      </dl>
+    </section>
+    <aside class="sandbox-preview">
+      <h4>原型预览</h4>
+      <figure>
+        <iframe title="隐私模式选择" src="../prototypes/prototype_v1.0.html?sandbox=true&focus=summary-card" sandbox="allow-scripts allow-same-origin"></iframe>
+        <figcaption>原型中包含隐私弹窗（点击左侧栏"隐私设置"或顶部"隐私说明"触发），支持本地/云端二选一。</figcaption>
+      </figure>
+    </aside>
+  </section>
+</article>
+
+<!-- 5.5 大文件聚焦总结 -->
+<article class="feature-module" id="s5-5">
+  <header class="feature-header">
+    <h3>功能五：大文件聚焦总结</h3>
+    <p>当大纲节点数超过 50 个时，AI 自动切换为聚焦模式——优先提取主标题、一级节点摘要和用户重点标注的内容。</p>
+  </header>
+  <section class="feature-content">
+    <section class="logic-rules">
+      <h4>聚焦流程图</h4>
+      <div class="mermaid">
+      flowchart TD
+        A[节点数 > 50] --> B[启用聚焦模式]
+        B --> C[提取主标题]
+        C --> D[遍历一级节点（最多10个）]
+        D --> E{有重点标注?}
+        E -->|有| F[标注节点分配更高权重]
+        E -->|无| G[按顺序提取节点概要]
+        F --> H[合并生成摘要]
+        G --> H
+        H --> I[摘要末尾追加提示]
+        I --> J[标记: 大文件摘要 📌]
+        J --> K[单行截断展示]
+      </div>
+
+      <h4>规则描述</h4>
+      <dl>
+        <dt>触发阈值</dt>
+        <dd>节点数 > 50 个（可配置），自动切换为聚焦模式</dd>
+        <dt>一级节点上限</dt>
+        <dd>最多提取前 10 个一级节点的纲要，避免摘要过长</dd>
+        <dt>重点标注优先</dt>
+        <dd>若用户在大纲中使用了标注/高亮功能，被标注的节点在总结中享有更高权重</dd>
+        <dt>摘要提示</dt>
+        <dd>摘要末尾追加"📌 聚焦总结"字样，告知用户这是浓缩版摘要</dd>
+        <dt>展开详情（远期）</dt>
+        <dd>点击摘要可展开完整版总结，显示更多层级的概要</dd>
+      </dl>
+    </section>
+    <aside class="sandbox-preview">
+      <h4>原型预览</h4>
+      <figure>
+        <iframe title="大文件聚焦总结" src="../prototypes/prototype_v1.0.html?sandbox=true&focus=summary-card" sandbox="allow-scripts allow-same-origin"></iframe>
+        <figcaption>原型中"2025年终总结"文件展示了大文件聚焦总结的样式：紫色"大文件摘要"标签 + 📌 聚焦总结文案。</figcaption>
+      </figure>
+    </aside>
+  </section>
+</article>
+
+<!-- ====== 六、业务流程图 ====== -->
+<section id="s6">
+<h2>六、业务流程图</h2>
+
+<div class="flowchart-embed">
+  <h4>主线流程：从用户打开到看见 AI 总结</h4>
+  <div class="mermaid">
+  flowchart TD
+    A[用户打开幕布] --> B{文件列表页加载}
+    B --> C[遍历每个文件]
+    C --> D{节点数 ≥ 5?}
+    D -->|否| E[标记: 无法总结]
+    D -->|是| F{AI 判断已完成?}
+    F -->|编辑中| G[标记: 编辑中]
+    F -->|已完成| H{已有总结?}
+    H -->|有| I[展示静态快照]
+    H -->|无| J{节点 > 50?}
+    J -->|是| K[聚焦模式总结]
+    J -->|否| L[标准模式总结]
+    K --> M[生成摘要]
+    L --> M
+    M --> N[展示在文件列表]
+    E --> N
+    G --> N
+    I --> N
+  </div>
+</div>
+
+<div class="flowchart-embed">
+  <h4>异常处理流程</h4>
+  <div class="mermaid">
+  flowchart TD
+    A[触发 AI 总结] --> B{API 调用}
+    B -->|成功| C[格式校验]
+    C -->|通过| D[写入摘要]
+    C -->|不通过| E[重试 1 次]
+    E --> B
+    B -->|超时| F[标记: 失败，网络超时]
+    B -->|不可用| G[标记: 失败，服务暂不可用]
+    B -->|内容违规| H[标记: 失败，内容不适用]
+    F --> I[显示重新生成按钮]
+    G --> I
+    H --> J[不提供重试]
+    I --> K[用户重试]
+    K --> B
+  </div>
+</div>
+
+<div class="flowchart-embed">
+  <h4>状态映射总览</h4>
+  <div class="mermaid">
+  flowchart LR
+    subgraph 正常态
+      A1[已总结 ✅] --> A2[已更新 🟠]
+    end
+    subgraph 过渡态
+      B1[生成中 🔵] --> B2[编辑中 ⏳]
+    end
+    subgraph 异常态
+      C1[无法总结 ⚪] --> C2[失败 🔴]
+    end
+    subgraph 特殊态
+      D1[大文件摘要 📌] --> D2[空文档 ⚪]
+    end
+    A2 -->|编辑保存| B2
+    B2 -->|AI判定完成| B1
+    B1 -->|成功| A1
+    B1 -->|失败| C2
+    C2 -->|重试| B1
+  </div>
+</div>
+
+<p style="font-size:13px; color:var(--text-secondary);">📁 完整流程图源码及更多分支流程见 <code>flows/flowchart_v1.0.md</code></p>
+</section>
+
+<!-- ====== 七、异常与边界处理 ====== -->
+<section id="s7">
+<h2>七、异常与边界处理</h2>
+
+<div class="table-wrap">
+<table>
+  <tr><th>场景</th><th>处理方式</th><th>用户感知</th></tr>
+  <tr>
+    <td><strong>断网</strong></td>
+    <td>云端模式下，总结请求失败 → 标记"失败"+ 提示"网络超时"</td>
+    <td>红色失败标签 + 重新生成按钮</td>
+  </tr>
+  <tr>
+    <td><strong>API 服务不可用</strong></td>
+    <td>标记"失败"+ 提示"服务暂不可用"</td>
+    <td>红色失败标签 + 重新生成按钮（带退避）</td>
+  </tr>
+  <tr>
+    <td><strong>总结内容过短/异常</strong></td>
+    <td>格式校验不通过 → 自动重试 1 次 → 仍失败则标记"失败"</td>
+    <td>静默重试（用户无感知）→ 失败后才展示</td>
+  </tr>
+  <tr>
+    <td><strong>节点 < 5</strong></td>
+    <td>不生成总结，提示"节点过少（X个），补充至5个节点后将自动生成"</td>
+    <td>灰色提示文字 + "无法总结"标签</td>
+  </tr>
+  <tr>
+    <td><strong>空白文档（0 节点）</strong></td>
+    <td>淡化展示，提示"无内容，无法生成总结"</td>
+    <td>半透明 + "空文档"标签</td>
+  </tr>
+  <tr>
+    <td><strong>敏感/违规内容</strong></td>
+    <td>API 返回内容不适用 → 标记"失败"+"内容不适用"，不提供重试</td>
+    <td>红色失败标签，无重试按钮</td>
+  </tr>
+  <tr>
+    <td><strong>用户快速连续保存</strong></td>
+    <td>防抖：距上次总结请求 < 30 秒则跳过，等最后一次保存后统一触发</td>
+    <td>无感知，避免重复请求</td>
+  </tr>
+  <tr>
+    <td><strong>本地模型不可用</strong></td>
+    <td>降级提示"本地模型未就绪"，自动切换为云端模式（需用户确认）</td>
+    <td>弹窗提示 + 引导切换</td>
+  </tr>
+  <tr>
+    <td><strong>第一次打开文件列表（全空）</strong></td>
+    <td>展示空状态页："还没有文档，创建你的第一篇大纲笔记" + 创建按钮</td>
+    <td>空状态引导页</td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 八、数据追踪与埋点 ====== -->
+<section id="s8">
+<h2>八、数据追踪与埋点</h2>
+
+<div class="table-wrap">
+<table>
+  <tr><th>事件</th><th>触发时机</th><th>关键参数</th><th>用途</th></tr>
+  <tr><td><strong>summary_view</strong></td><td>用户在文件列表页看到 AI 总结</td><td>文件数、有总结的文件数、状态分布</td><td>衡量触达率</td></tr>
+  <tr><td><strong>summary_generate_start</strong></td><td>AI 开始生成总结</td><td>文件ID、节点数、处理模式（本地/云端）</td><td>衡量触发频率</td></tr>
+  <tr><td><strong>summary_generate_done</strong></td><td>AI 总结生成成功</td><td>文件ID、耗时、摘要长度、模式</td><td>衡量生成质量与性能</td></tr>
+  <tr><td><strong>summary_generate_fail</strong></td><td>AI 总结生成失败</td><td>文件ID、错误类型、重试次数</td><td>监控异常率</td></tr>
+  <tr><td><strong>summary_retry_click</strong></td><td>用户点击"重新生成"</td><td>文件ID、失败原因</td><td>衡量用户重试意愿</td></tr>
+  <tr><td><strong>summary_feedback</strong></td><td>用户对总结点赞/踩（远期）</td><td>文件ID、反馈类型、摘要内容</td><td>优化模型质量</td></tr>
+  <tr><td><strong>privacy_mode_select</strong></td><td>用户选择/切换隐私模式</td><td>选择结果（本地/云端）、触发来源</td><td>衡量隐私偏好分布</td></tr>
+  <tr><td><strong>status_filter_use</strong></td><td>用户使用状态筛选下拉</td><td>筛选条件</td><td>衡量筛选功能使用率</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 九、未来演进规划 ====== -->
+<section id="s9">
+<h2>九、未来演进规划</h2>
+
+<div class="table-wrap">
+<table>
+  <tr><th>阶段</th><th>内容</th><th>目标</th><th>付费?</th></tr>
+  <tr>
+    <td><strong>Phase 1（v1.0）</strong></td>
+    <td>AI 智能总结（文件列表页摘要展示），7 种状态标签，隐私模式选择</td>
+    <td>建立 AI 心智，证明产品还活着</td>
+    <td><span class="tag green">免费</span></td>
+  </tr>
+  <tr>
+    <td><strong>Phase 2（v1.1）</strong></td>
+    <td>AI 一键生成思维导图（输入主题/导入 PDF → 自动生成大纲+导图）</td>
+    <td>拉新 + 第一次变现</td>
+    <td><span class="tag amber">付费</span></td>
+  </tr>
+  <tr>
+    <td><strong>Phase 3（v1.2）</strong></td>
+    <td>AI 优化大纲结构（自动调整层级、合并冗余节点、补充缺失内容）</td>
+    <td>深度留存 + 二次变现</td>
+    <td><span class="tag amber">付费</span></td>
+  </tr>
+  <tr>
+    <td><strong>Phase 4（v2.0）</strong></td>
+    <td>AI 辅助头脑风暴（选中节点一键扩写分支）、多模态导入（语音/图片→大纲）</td>
+    <td>与 Xmind 正面竞争</td>
+    <td><span class="tag amber">Freemium</span></td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 十、附件 ====== -->
+<section id="s10">
+<h2>十、附件</h2>
+
+<h3>10.1 交付清单</h3>
+<ul class="checklist">
+  <li>✅ 清晰用户旅程图（第三章）</li>
+  <li>✅ 每个核心功能都有 Mermaid 流程图（第五章 + 第六章）</li>
+  <li>✅ 每个原型切片都开启 Focus Mode（第五章 iframe 含 ?focus=summary-card）</li>
+  <li>✅ 补充断网、空数据、无权限等异常说明（第七章）</li>
+  <li>✅ PRD 与原型路径一致（prototype_v1.0.html）</li>
+</ul>
+
+<h3>10.2 项目文件索引</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>文件</th><th>路径</th><th>说明</th></tr>
+  <tr><td>初版 PRD</td><td><code>requirements/prd_v1.0.html</code></td><td>含市场分析、竞品分析、对比分析</td></tr>
+  <tr><td>最终版 PRD</td><td><code>requirements/prd_v1.0_final.html</code></td><td>本文件，含原型切片和流程图</td></tr>
+  <tr><td>交互原型</td><td><code>prototypes/prototype_v1.0.html</code></td><td>可交互 HTML 原型，9 种状态 + Focus Mode</td></tr>
+  <tr><td>流程图</td><td><code>flows/flowchart_v1.0.md</code></td><td>7 张 Mermaid 流程图源码</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ====== 附录：市场分析与竞品 ====== -->
+<section id="s11">
+<h2>附录：市场分析与竞品摘要</h2>
+
+<div class="card">
+  <h3>市场规模</h3>
+  <p>AI 思维导图工具市场 2025 年约 9-21 亿美元，CAGR ~21%。整体思维导图软件市场 ~17 亿美元，CAGR ~15%。AI 化是核心增长引擎。</p>
+</div>
+
+<div class="card">
+  <h3>核心竞品：Xmind</h3>
+  <p>中国市场占有率第一，2023 年启动 AI 化，2025 年全面发布 Copilot（4 大 AI 功能 + DeepSeek-R1）。覆盖 C/B/G 三端，定价 ¥68-388/年。AI 聚焦"生成新导图"，尚无"对已有导图做智能总结"。</p>
+</div>
+
+<div class="card">
+  <h3>参照竞品：豆包</h3>
+  <p>同为字节系，AI 总结能力强大（256K 上下文、视频总结、深度研究）。但总结"扁平化"——不感知内容层级结构，常抓不住重点，存在幻觉。幕布的"结构感知型总结"是其盲区。</p>
+</div>
+
+<div class="key-insight">
+  <strong>💡 幕布的核心差异化机会：</strong>"结构感知型 AI 总结"——基于大纲层级结构，逐层提炼主旨，既不失精度也不失结构。这是 Xmind 和豆包的共同盲区。详见初版 PRD（requirements/prd_v1.0.html）中的完整市场分析和 SWOT 对比。
+</div>
+</section>
+
+<!-- Footer -->
+<div class="prd-footer">
+  <p>幕布 AI 智能总结 · 最终版 PRD v1.0 · 生成于 2026-05-31</p>
+  <p style="margin-top:4px;">用途：个人产品学习研究 · 项目：mubu-ai-summary</p>
+</div>
+
+</main>
+
+<script>
+// Highlight current section in side nav on scroll
+(function() {
+  const sections = document.querySelectorAll('section[id], article[id]');
+  const navLinks = document.querySelectorAll('.side-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
